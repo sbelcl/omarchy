@@ -89,6 +89,14 @@ function modeLabel(device, onBattery, states) {
   return "Charging"
 }
 
+// The profile ids powerprofilesctl reports, as the English label the panel
+// shows and the translation catalog is keyed by.
+function profileLabel(profile) {
+  var value = String(profile || "")
+  if (value === "") return ""
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 if (typeof module !== "undefined") {
   module.exports = {
     clampIndex: clampIndex,
@@ -99,6 +107,7 @@ if (typeof module !== "undefined") {
     batteryFraction: batteryFraction,
     chargeThresholdActive: chargeThresholdActive,
     batteryIcon: batteryIcon,
-    modeLabel: modeLabel
+    modeLabel: modeLabel,
+    profileLabel: profileLabel
   }
 }

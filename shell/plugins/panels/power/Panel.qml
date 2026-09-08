@@ -52,9 +52,11 @@ Panel {
     return Model.batteryIcon(device, root.discharging, upowerStates())
   }
 
+  // Model.js stays English and Qt-free: it is unit tested under node, and a
+  // label it returns is a key here rather than a finished string.
   function modeLabel() {
     var device = UPower.displayDevice
-    return Model.modeLabel(device, root.discharging, upowerStates())
+    return Translations.t(Model.modeLabel(device, root.discharging, upowerStates()))
   }
 
   function profileIcon(name) {
@@ -94,26 +96,26 @@ Panel {
   // Cute agent-flavored phrases shown in the hero status line, rotated on a
   // timer so the panel feels alive when current is flowing (either direction).
   readonly property var chargingPhrases: [
-    "Pumping power",
-    "Injecting electrons",
-    "Pouring juice",
-    "Amassing watts",
-    "Hoarding joules",
-    "Sucking volts",
-    "Topping reserves",
-    "Soaking amps",
-    "Inhaling kilowatts"
+    Translations.t("Pumping power"),
+    Translations.t("Injecting electrons"),
+    Translations.t("Pouring juice"),
+    Translations.t("Amassing watts"),
+    Translations.t("Hoarding joules"),
+    Translations.t("Sucking volts"),
+    Translations.t("Topping reserves"),
+    Translations.t("Soaking amps"),
+    Translations.t("Inhaling kilowatts")
   ]
   readonly property var onBatteryPhrases: [
-    "Slurping power",
-    "Spending joules",
-    "Draining watts",
-    "Burning electrons",
-    "Sipping juice",
-    "Spending coulombs",
-    "Bleeding amps",
-    "Guzzling volts",
-    "Munching reserves"
+    Translations.t("Slurping power"),
+    Translations.t("Spending joules"),
+    Translations.t("Draining watts"),
+    Translations.t("Burning electrons"),
+    Translations.t("Sipping juice"),
+    Translations.t("Spending coulombs"),
+    Translations.t("Bleeding amps"),
+    Translations.t("Guzzling volts"),
+    Translations.t("Munching reserves")
   ]
   property int phraseIndex: 0
 
@@ -127,7 +129,7 @@ Panel {
   readonly property bool rotatingPhrases: activePhrases.length > 0
 
   readonly property string heroStatusText: {
-    if (fullyCharged) return "Fully charged"
+    if (fullyCharged) return Translations.t("Fully charged")
     if (rotatingPhrases) return activePhrases[phraseIndex % activePhrases.length]
     return modeLabel()
   }
@@ -346,7 +348,7 @@ Panel {
             spacing: Style.space(2)
 
             Text {
-              text: "Battery"
+              text: Translations.t("Battery")
               color: root.bar.foreground
               font.family: root.bar.fontFamily
               font.pixelSize: Style.font.title
@@ -433,20 +435,20 @@ Panel {
           Column {
             width: (parent.width - parent.spacing) / 2
             spacing: Style.spacing.labelGap
-            InfoPair { label: "Battery size"; value: root.batteryInfo.size || "" }
-            InfoPair { label: "Charge cycles"; value: root.batteryInfo.cycles || "—" }
+            InfoPair { label: Translations.t("Battery size"); value: root.batteryInfo.size || "" }
+            InfoPair { label: Translations.t("Charge cycles"); value: root.batteryInfo.cycles || "—" }
           }
 
           Column {
             width: (parent.width - parent.spacing) / 2
             spacing: Style.spacing.labelGap
             InfoPair {
-              label: root.chargeThresholdActive ? "Charge limit" : (root.discharging ? "Time left" : "Time to full")
+              label: root.chargeThresholdActive ? Translations.t("Charge limit") : (root.discharging ? Translations.t("Time left") : Translations.t("Time to full"))
               value: root.chargeThresholdActive ? (root.batteryInfo.threshold || "-") : (root.batteryFlowIdle ? "-" : (root.batteryInfo.time || "—"))
             }
             InfoPair {
-              label: root.chargeThresholdActive ? "Battery state" : (root.discharging ? "Discharging" : "Charging")
-              value: root.chargeThresholdActive ? "Holding" : (root.batteryFull ? "-" : (root.batteryInfo.rate || ""))
+              label: root.chargeThresholdActive ? Translations.t("Battery state") : (root.discharging ? Translations.t("Discharging") : Translations.t("Charging"))
+              value: root.chargeThresholdActive ? Translations.t("Holding") : (root.batteryFull ? "-" : (root.batteryInfo.rate || ""))
             }
           }
         }
@@ -461,7 +463,7 @@ Panel {
           spacing: Style.space(10)
 
           PanelSectionHeader {
-            text: "POWER PROFILE"
+            text: Translations.t("POWER PROFILE")
             foreground: root.bar.foreground
             fontFamily: root.bar.fontFamily
           }
@@ -483,7 +485,7 @@ Panel {
                 width: profileRow.cellWidth
                 iconText: root.profileIcon(String(modelData))
                 iconSize: Style.font.title
-                text: String(modelData).charAt(0).toUpperCase() + String(modelData).slice(1)
+                text: Translations.t(Model.profileLabel(String(modelData)))
                 fontSize: Style.font.bodySmall
                 foreground: root.bar.foreground
                 fontFamily: root.bar.fontFamily
