@@ -12,12 +12,10 @@
   "Time left": "Preostali čas",
   "Time to full": "Čas do napolnjenosti",
   "Battery state": "Stanje baterije",
-
   "POWER PROFILE": "PROFIL PORABE",
   "Performance": "Zmogljivost",
   "Balanced": "Uravnoteženo",
   "Power-saver": "Varčevanje",
-
   "Pumping power": "Črpanje energije",
   "Injecting electrons": "Vbrizgavanje elektronov",
   "Pouring juice": "Nalivanje soka",
@@ -27,7 +25,6 @@
   "Topping reserves": "Polnjenje zalog",
   "Soaking amps": "Vpijanje amperov",
   "Inhaling kilowatts": "Vdihavanje kilovatov",
-
   "Slurping power": "Srebanje energije",
   "Spending joules": "Trošenje joulov",
   "Draining watts": "Izčrpavanje vatov",
@@ -36,5 +33,11 @@
   "Spending coulombs": "Trošenje coulombov",
   "Bleeding amps": "Puščanje amperov",
   "Guzzling volts": "Požiranje voltov",
-  "Munching reserves": "Grizljanje zalog"
+  "Munching reserves": "Grizljanje zalog",
+  "Merged from %1 device": {
+    "one": "Združeno z %1 napravo",
+    "two": "Združeno z %1 napravama",
+    "few": "Združeno s %1 napravami",
+    "other": "Združeno s %1 napravami"
+  }
 }

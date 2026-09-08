@@ -44,8 +44,27 @@ QtObject {
     userLanguage.entries, userRegion.entries
   ])
 
-  function t(source) {
-    return Catalogs.translate(root.catalog, source)
+  // t("Battery")                        a plain string
+  // t("Start weeks on %1", day)         a string with a value in it
+  //
+  // Placeholders rather than concatenation at the call site: a translation
+  // has to be able to put the value where its own grammar wants it.
+  function t(source, args) {
+    var translated = Catalogs.translate(root.catalog, source)
+    return args === undefined ? translated : Catalogs.format(translated, args)
+  }
+
+  // plural(n, "%1 device", "%1 devices")
+  //
+  // Both English forms stay at the call site, so an untranslated shell counts
+  // correctly in English. A catalog translates the singular to an object of
+  // CLDR categories, which is the only way to say this in a language with
+  // more forms than English has -- Slovenian has four, and a dual among them:
+  //
+  //   "%1 device": { "one": "%1 naprava", "two": "%1 napravi",
+  //                  "few": "%1 naprave", "other": "%1 naprav" }
+  function plural(count, singular, other) {
+    return Catalogs.translatePlural(root.catalog, count, singular, other, root.locale)
   }
 
   component Catalog: FileView {

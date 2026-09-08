@@ -44,9 +44,14 @@ function parseCatalog(text) {
     return {}
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {}
+  // A string entry is a translation; an object entry is a set of plural
+  // categories. Anything else -- a number, a null, an empty string -- is
+  // dropped so it falls back to English rather than rendering as itself.
   var out = {}
   for (var key in parsed) {
-    if (typeof parsed[key] === "string" && parsed[key] !== "") out[key] = parsed[key]
+    var value = parsed[key]
+    if (typeof value === "string" && value !== "") out[key] = value
+    else if (value && typeof value === "object" && !Array.isArray(value)) out[key] = value
   }
   return out
 }
@@ -71,6 +76,98 @@ function translate(catalog, source) {
   return typeof value === "string" && value !== "" ? value : key
 }
 
+// %1..%9, filled from the arguments in order. Placeholders rather than
+// concatenation is what lets a translation put the value where its own
+// grammar wants it: "Start weeks on %1" and "%1 se začne teden" carry the
+// same argument in different places, and string concatenation at the call
+// site can express only the first.
+function format(text, args) {
+  var values = args === undefined || args === null ? [] : (Array.isArray(args) ? args : [args])
+  return String(text).replace(/%([1-9])/g, function (match, index) {
+    var value = values[Number(index) - 1]
+    return value === undefined || value === null ? match : String(value)
+  })
+}
+
+// CLDR plural categories, integers only -- the shell counts things, it does
+// not measure them. A language that is not listed falls through to the
+// English shape, and every category falls back to "other", so an unlisted
+// language and a catalog that only fills in "other" both still read.
+//
+// The families here cover what a European desktop actually meets, plus the
+// three shapes that differ most from English: Slavic (Slovenian's dual
+// included), east Asian (no agreement at all), and Arabic.
+function pluralCategory(count, language) {
+  var n = Math.abs(Math.floor(Number(count) || 0))
+  var lang = baseLanguage(language)
+  var mod10 = n % 10
+  var mod100 = n % 100
+
+  switch (lang) {
+    // 1 naprava, 2 napravi, 3-4 naprave, 5+ naprav.
+    case "sl":
+      if (mod100 === 1) return "one"
+      if (mod100 === 2) return "two"
+      if (mod100 === 3 || mod100 === 4) return "few"
+      return "other"
+
+    case "ru": case "uk": case "be": case "sr": case "hr": case "bs":
+      if (mod10 === 1 && mod100 !== 11) return "one"
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "few"
+      return "many"
+
+    case "pl":
+      if (n === 1) return "one"
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "few"
+      return "many"
+
+    case "cs": case "sk":
+      if (n === 1) return "one"
+      if (n >= 2 && n <= 4) return "few"
+      return "other"
+
+    case "lt":
+      if (mod10 === 1 && (mod100 < 11 || mod100 > 19)) return "one"
+      if (mod10 >= 2 && mod10 <= 9 && (mod100 < 11 || mod100 > 19)) return "few"
+      return "other"
+
+    case "ar":
+      if (n === 0) return "zero"
+      if (n === 1) return "one"
+      if (n === 2) return "two"
+      if (mod100 >= 3 && mod100 <= 10) return "few"
+      if (mod100 >= 11 && mod100 <= 99) return "many"
+      return "other"
+
+    // No number agreement: one form covers every count.
+    case "ja": case "zh": case "ko": case "th": case "vi": case "id": case "ms":
+      return "other"
+
+    case "fr":
+      return n === 0 || n === 1 ? "one" : "other"
+
+    default:
+      return n === 1 ? "one" : "other"
+  }
+}
+
+// The singular is the catalog key, and its entry is an object of categories.
+// Both English forms stay at the call site, so an untranslated shell still
+// counts correctly in English -- the same rule as every other string here.
+function translatePlural(catalog, count, singular, other, language) {
+  var entry = catalog ? catalog[String(singular)] : undefined
+  if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+    var category = pluralCategory(count, language)
+    var picked = entry[category]
+    if (typeof picked !== "string" || picked === "") picked = entry.other
+    if (typeof picked === "string" && picked !== "") return format(picked, count)
+  }
+  // A plural key translated to a single string is a mistake in the catalog,
+  // not a form: it would read wrong at every count but one. English is the
+  // safer answer.
+  return format(pluralCategory(count, "en") === "one" ? singular : other, count)
+}
+
 // QML imports this file as a plain script; node needs the exports to test it.
 // The guard is what keeps the same file usable from both.
 if (typeof module !== "undefined" && module.exports) {
@@ -80,6 +177,9 @@ if (typeof module !== "undefined" && module.exports) {
     isTranslatable: isTranslatable,
     parseCatalog: parseCatalog,
     mergeCatalogs: mergeCatalogs,
-    translate: translate
+    translate: translate,
+    format: format,
+    pluralCategory: pluralCategory,
+    translatePlural: translatePlural
   }
 }

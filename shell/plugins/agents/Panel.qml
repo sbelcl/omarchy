@@ -263,7 +263,7 @@ Panel {
   function footerText() {
     if (usage.syncStatusText !== "") return usage.syncStatusText
     if (provider && provider.syncEnabled && provider.syncDeviceCount > 0)
-      return "Merged from " + provider.syncDeviceCount + " device" + (provider.syncDeviceCount === 1 ? "" : "s")
+      return Translations.plural(provider.syncDeviceCount, "Merged from %1 device", "Merged from %1 devices")
     return ""
   }
 
